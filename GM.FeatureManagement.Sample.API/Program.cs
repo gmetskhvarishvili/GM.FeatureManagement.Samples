@@ -1,6 +1,7 @@
 using GM.Caching;
 using GM.Caching.Redis;
 using GM.FeatureManagement;
+using GM.FeatureManagement.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,7 +45,14 @@ builder.Services.AddGMFeatureManagement(builder.Configuration.GetSection("Featur
     });
 });
 
+// ASP.NET Core gating: [FeatureGate] on controllers + .RequireFeature(...) on minimal-API endpoints,
+// with the request FeatureContext built from the caller's claims. A closed gate returns 404 (default).
+builder.Services.AddGMFeatureManagementAspNetCore();
+builder.Services.AddControllers();
+
 var app = builder.Build();
+
+app.MapControllers();
 
 app.MapGet("/", () => Results.Ok(new
 {
@@ -55,8 +63,15 @@ app.MapGet("/", () => Results.Ok(new
         "GET /kyc/route?userId=alice   → which KYC vendor this user is routed to (sticky per user)",
         "GET /features/new-payments?userId=alice → whether the in-progress NewPayments feature is on",
         "GET /features               → all defined flags (admin/diagnostic listing)",
+        "GET /payments/checkout      → minimal-API endpoint gated by .RequireFeature(NewPayments) (404 in prod)",
+        "GET /api/payments           → MVC controller action gated by [FeatureGate(NewPayments)] (404 in prod)",
     },
 }));
+
+// ---- ASP.NET gating: a minimal-API endpoint behind the NewPayments flag ------------------------
+// 404 when the gate is closed (prod), 200 when open (dev/staging) — the feature simply "isn't there".
+app.MapGet("/payments/checkout", () => Results.Ok(new { status = "checkout ready (NewPayments is on)" }))
+   .RequireFeature("NewPayments");
 
 // ---- Use case 1: sticky per-user KYC vendor routing via a weighted variant --------------------
 app.MapGet("/kyc/route", async (string userId, IFeatureManager features, CancellationToken ct) =>

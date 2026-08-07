@@ -9,11 +9,13 @@
     <!--
       References the sibling source repo by project path so it builds against current code. Once the
       package is published, swap for:
-        <PackageReference Include="GM.FeatureManagement" Version="1.0.0" />
-        <PackageReference Include="GM.Caching"           Version="1.0.0" />
+        <PackageReference Include="GM.FeatureManagement"           Version="1.0.0" />
+        <PackageReference Include="GM.FeatureManagement.AspNetCore" Version="1.0.0" />
+        <PackageReference Include="GM.Caching"                     Version="1.0.0" />
     -->
     <ItemGroup>
         <ProjectReference Include="..\..\GM.FeatureManagement\GM.FeatureManagement\GM.FeatureManagement.csproj" />
+        <ProjectReference Include="..\..\GM.FeatureManagement\GM.FeatureManagement.AspNetCore\GM.FeatureManagement.AspNetCore.csproj" />
     </ItemGroup>
 
     <ItemGroup>

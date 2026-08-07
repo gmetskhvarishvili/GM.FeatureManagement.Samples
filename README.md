@@ -29,6 +29,14 @@ curl "http://localhost:5xxx/features/new-payments?userId=alice"
 
 `GET /features` lists all defined flags (an admin/diagnostic view over `IFeatureDefinitionProvider`).
 
+**ASP.NET gating** — the same `NewPayments` flag guards whole endpoints. Both return **404 in
+Production** (feature looks absent) and **200 in Development**:
+
+```bash
+curl -i "http://localhost:5xxx/payments/checkout"   # minimal API: .RequireFeature("NewPayments")
+curl -i "http://localhost:5xxx/api/payments"        # MVC controller: [FeatureGate("NewPayments")]
+```
+
 ## What it shows
 
 - `AddGMFeatureManagement(configuration, postConfigure)` — flags from **appsettings** plus a
