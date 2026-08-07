@@ -7,18 +7,14 @@
     </PropertyGroup>
 
     <!--
-      References the sibling source repo by project path so it builds against current code. Once the
-      package is published, swap for:
-        <PackageReference Include="GM.FeatureManagement"           Version="1.0.0" />
-        <PackageReference Include="GM.FeatureManagement.AspNetCore" Version="1.0.0" />
-        <PackageReference Include="GM.Caching"                     Version="1.0.0" />
+      Published-package references — the shape the sample ships in once the GM.FeatureManagement
+      packages are live on nuget.org (isolated CI restores them normally). For local development
+      against the sibling source repo, use the ProjectReference form on the feat/featuremanagement-sample
+      branch instead.
     -->
     <ItemGroup>
-        <ProjectReference Include="..\..\GM.FeatureManagement\GM.FeatureManagement\GM.FeatureManagement.csproj" />
-        <ProjectReference Include="..\..\GM.FeatureManagement\GM.FeatureManagement.AspNetCore\GM.FeatureManagement.AspNetCore.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
+        <PackageReference Include="GM.FeatureManagement" Version="1.0.0" />
+        <PackageReference Include="GM.FeatureManagement.AspNetCore" Version="1.0.0" />
         <PackageReference Include="GM.Caching" Version="1.0.0" />
         <PackageReference Include="GM.Caching.Redis" Version="1.0.0" />
     </ItemGroup>
