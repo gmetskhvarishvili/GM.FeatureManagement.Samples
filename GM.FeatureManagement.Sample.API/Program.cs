@@ -2,8 +2,11 @@ using GM.Caching;
 using GM.Caching.Redis;
 using GM.FeatureManagement;
 using GM.FeatureManagement.AspNetCore;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddHealthChecks();
 
 // Cache backing for flag definitions. In-memory is fine for a single instance; point Redis at a
 // shared instance so every replica evaluates flags identically (sticky rollouts across the fleet):
@@ -54,18 +57,25 @@ var app = builder.Build();
 
 app.MapControllers();
 
+// Liveness must not depend on downstream dependencies, so it runs no checks; readiness runs
+// every registered health check (none here yet). See engineering baseline §11.
+app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false });
+app.MapHealthChecks("/health/ready");
+
+string[] tryIt =
+[
+    "GET /kyc/route?userId=alice   → which KYC vendor this user is routed to (sticky per user)",
+    "GET /features/new-payments?userId=alice → whether the in-progress NewPayments feature is on",
+    "GET /features               → all defined flags (admin/diagnostic listing)",
+    "GET /payments/checkout      → minimal-API endpoint gated by .RequireFeature(NewPayments) (404 in prod)",
+    "GET /api/payments           → MVC controller action gated by [FeatureGate(NewPayments)] (404 in prod)",
+];
+
 app.MapGet("/", () => Results.Ok(new
 {
     message = "GM.FeatureManagement sample",
     environment = app.Environment.EnvironmentName,
-    try_it = new[]
-    {
-        "GET /kyc/route?userId=alice   → which KYC vendor this user is routed to (sticky per user)",
-        "GET /features/new-payments?userId=alice → whether the in-progress NewPayments feature is on",
-        "GET /features               → all defined flags (admin/diagnostic listing)",
-        "GET /payments/checkout      → minimal-API endpoint gated by .RequireFeature(NewPayments) (404 in prod)",
-        "GET /api/payments           → MVC controller action gated by [FeatureGate(NewPayments)] (404 in prod)",
-    },
+    try_it = tryIt,
 }));
 
 // ---- ASP.NET gating: a minimal-API endpoint behind the NewPayments flag ------------------------
@@ -108,7 +118,10 @@ app.MapGet("/features", async (IFeatureDefinitionProvider provider, Cancellation
     return Results.Ok(all);
 });
 
-app.Run();
+await app.RunAsync();
 
 // Exposed so the test project can spin the app up with WebApplicationFactory.
-public partial class Program;
+public partial class Program
+{
+    protected Program() { }
+}
