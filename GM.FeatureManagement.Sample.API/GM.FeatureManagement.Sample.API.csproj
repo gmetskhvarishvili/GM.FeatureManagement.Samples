@@ -13,10 +13,10 @@
       branch instead.
     -->
     <ItemGroup>
-        <PackageReference Include="GM.FeatureManagement" Version="1.0.0" />
-        <PackageReference Include="GM.FeatureManagement.AspNetCore" Version="1.0.0" />
-        <PackageReference Include="GM.Caching" Version="1.0.0" />
-        <PackageReference Include="GM.Caching.Redis" Version="1.0.0" />
+        <PackageReference Include="GM.FeatureManagement" Version="1.0.1" />
+        <PackageReference Include="GM.FeatureManagement.AspNetCore" Version="1.0.1" />
+        <PackageReference Include="GM.Caching" Version="1.0.1" />
+        <PackageReference Include="GM.Caching.Redis" Version="1.0.1" />
     </ItemGroup>
 
 </Project>

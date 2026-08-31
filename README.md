@@ -58,5 +58,4 @@ dotnet test
 **splits traffic** across both vendors, and that the environment gate flips `NewPayments` between
 Production (off) and Development (on).
 
-> References the sibling `GM.FeatureManagement` source repo by project path. Once the package is
-> published, swap the `ProjectReference` in the API csproj for a `PackageReference`.
+> References the published `GM.FeatureManagement` / `GM.FeatureManagement.AspNetCore` NuGet packages.
